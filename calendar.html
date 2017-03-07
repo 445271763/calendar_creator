@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="renderer" content="webkit">
+<title>JS日历</title>
+<head>
+<style type="text/css">
+	body{font-family: 微软雅黑;background: #6F7FA0;}
+	*{padding: 0px;margin: 0px;}
+	li{list-style: none;}
+	.y-calendar-calendar-head{border-bottom: 1px solid #9BC5E8;width: 796px;text-align: center;margin: 0 auto;background-color: #434E65;color: white;height: 50px;}
+	.y-calendar-calendar-head .y-calendar-mon-btn{width: 50px;height: 50px;background-color: #2A364E;cursor: pointer;}
+	.y-calendar-calendar-head .y-calendar-selecter-box{width: 400px;float: left;margin-left: 32%;}
+	.y-calendar-calendar-head .y-calendar-selecter{float: left;width:100px;height:40px;line-height:40px;cursor: pointer;position: relative;}
+	.y-calendar-calendar-head .y-calendar-selecter:hover{background-color: #2A364E; }
+	.y-calendar-calendar-head .y-calendar-year-selecter{margin-right: 10px;}
+	.y-calendar-calendar-head .y-calendar-selecter .y-calendar-selecter-drop{display: none;position: absolute;left: 0;top: 40px;background-color: #2A364E;width: 100%;height: 200px;overflow: auto;}
+	.y-calendar-calendar-head .y-calendar-selecter .y-calendar-selecter-drop ul li:hover{background-color: #7B8CAF;}
+	.y-calendar-calendar-head .y-calendar-prev-mon-btn{float: left;}
+	.y-calendar-calendar-head .y-calendar-next-mon-btn{float: right;}
+
+
+	table{width: 800px;margin: 0 auto;border: 1px solid red;border-collapse:collapse;}
+	table td{border: 1px solid #434E65;padding: 30px 0;text-align: center;cellpadding:0;cellspacing:0;border-collapse:collapse;background-color: #434E65;color: white;}
+	table td:hover{border: 1px solid #9BC5E8;}
+	.y-calendar-calendar{width: 800px;margin: 0 auto;}
+	.y-calendar-calendar ul li{width: 100%;height: 50px;float: left;}
+	.y-calendar-calendar ul li ol{border: 1px solid #434E65;width:112px;height:100%;text-align: center;background-color: #434E65;color: white;float: left;display: -webkit-box; -webkit-box-orient: horizontal; -webkit-box-pack: center; -webkit-box-align: center; display: -moz-box; -moz-box-orient: horizontal; -moz-box-pack: center; -moz-box-align: center; display: -o-box; -o-box-orient: horizontal; -o-box-pack: center; -o-box-align: center; display: -ms-box; -ms-box-orient: horizontal; -ms-box-pack: center; -ms-box-align: center; display: box; box-orient: horizontal; box-pack: center; box-align: center;line-height: 50px;}
+	.y-calendar-calendar ul li ol:hover{border: 2px solid #9BC5E8;width: 110px;height: 46px;}
+	.y-calendar-week-head ul li{background-color: #6C7C9E;}
+	.y-calendar-container .disable-class{background-color: #2A364E !important;}
+	.y-calendar-container .is-today{background-color: #7B8CAF;};
+</style>
+</head>
+<body>
+<div class="y-calendar-container">
+	<div class="y-calendar-calendar-head">
+		<div onclick="Ydatepicker.prevMonth()" class="y-calendar-prev-mon-btn y-calendar-mon-btn"></div>
+		<div class="y-calendar-selecter-box">
+			<div onclick="Ydatepicker.yearSelect()" class="y-calendar-year-selecter y-calendar-selecter">
+				<div class="y-calendar-current-year y-calendar-current">2015</div>
+				<div class="y-calendar-year-selecter-drop y-calendar-selecter-drop">
+					<ul>
+						<li>1970</li>
+						<li>1971</li>
+						<li>1972</li>
+					</ul>
+				</div>
+			</div>			
+			<div onclick="Ydatepicker.monthSelect()" class="y-calendar-month-selecter y-calendar-selecter">
+				<div class="y-calendar-current-month y-calendar-current">12</div>
+				<div class="y-calendar-month-selecter-drop y-calendar-selecter-drop">
+					<ul>
+						<li>1</li>
+						<li>2</li>
+						<li>3</li>
+						<li>4</li>
+						<li>5</li>
+						<li>6</li>
+						<li>7</li>
+						<li>8</li>
+						<li>9</li>
+						<li>10</li>
+						<li>11</li>
+						<li>12</li>
+					</ul>
+				</div>
+			</div>
+		</div>			
+		<div onclick="Ydatepicker.nextMonth()" class="y-calendar-next-mon-btn y-calendar-mon-btn"></div>
+	</div>
+	<div class="y-calendar-week-head y-calendar-calendar">
+		<ul>
+			<li>
+				<ol>日</ol>
+				<ol>一</ol>
+				<ol>二</ol>
+				<ol>三</ol>
+				<ol>四</ol>
+				<ol>五</ol>
+				<ol>六</ol>
+			</li>
+		</ul>
+	</div>
+	<div class="y-calendar-calendar y-calendar-calendar-box">
+		<ul>
+			
+		</ul>
+	</div>
+</div>
+
+</body>
+<script type="text/javascript">
+if (!document.getElementsByClassName) {
+    document.getElementsByClassName = function(className, element) {
+        var children = (element || document).getElementsByTagName('*');
+        var elements = new Array();
+        for (var i = 0; i < children.length; i++) {
+            var child = children[i];
+            var classNames = child.className.split(' ');
+            for (var j = 0; j < classNames.length; j++) {
+                if (classNames[j] == className) {
+                    elements.push(child);
+                    break;
+                }
+            }
+        }
+        return elements;
+    };
+}
+
+var Ydatepicker = function(setting)
+{
+	var _this = this;
+	_this.year = 0;
+	_this.month = 12;
+	_this.day = 1;
+	_this.currentYear = 0;
+	_this.currentMonth = 0;
+	_this.currentDay = 0;
+	_this.html = '';
+	_this.openTag = 'ol';
+	_this.closeTag = 'ol';
+	_this.lineOpenTag = 'li';
+	_this.lineCloseTag = 'li';
+	_this.weekFirst = 0; //0-6 星期日-星期六
+	//获取指定月份天数
+	_this.countMonthDays = function (year,month)
+	{
+		var d = new Date();
+		year  = year ? year : d.getFullYear() ;
+		month = month ? month : d.getMonth()+1 ;
+		month = parseInt(month,10); //parseInt(number,type)这个函数后面如果不跟第2个参数来表示进制的话，默认是10进制。 
+		var temp = new Date(year,month,0); 
+		return temp.getDate(); 
+	}
+
+	_this.createCalendarHtml = function(year,month)
+	{
+		var d = new Date();
+		var year = parseInt(year) ? parseInt(year) : d.getFullYear() ;
+		var month = parseInt(month) ? parseInt(month) : d.getMonth()+1 ;
+		
+		var firstDayWeek = new Date(year+'/'+month+'/'+1).getDay();//给定月份第一天是星期几
+		var days = _this.countMonthDays(year,month);//给定月份总天数
+		var lastDayWeek = new Date(year+'/'+month+'/'+days).getDay();//给定月份最后一天是星期几
+		var calendarDays = [];
+
+		for(var i=1; i <= days; i++)
+		{
+			calendarDays.push(i);
+		}
+		//如果第一天不是星期天 则需要在日历前加上上一个月的日历
+		var prevNum = 0;
+		if (firstDayWeek!=0)
+		{
+			if (month==1)
+			{
+				var prevMonth = 12;
+				var prevYear = year-1;
+			}
+			else
+			{
+				var prevMonth = month-1;
+				var prevYear  = year;
+			}
+
+			var prevDays = _this.countMonthDays(prevYear,prevMonth);//前一个月天数是多少天
+			var prevCalenderDays = [];
+			for(var i=(prevDays-firstDayWeek)+1; i<=prevDays ; i++)
+			{
+				prevCalenderDays.push(i);
+			}
+			prevNum = prevDays - (prevDays-firstDayWeek);
+			calendarDays = prevCalenderDays.concat(calendarDays);
+		}
+
+		//如果最后一天不是星期六 则需要在日历后加上下一个月的日历
+		lastNum = 6-lastDayWeek;
+		if (lastNum>0)
+		{
+			nextCalenderDays = [];
+			for(var i=1; i <= lastNum ; i++)
+			{
+				nextCalenderDays.push(i);
+			}
+
+			calendarDays = calendarDays.concat(nextCalenderDays);
+		}
+
+		_this.html = '';
+		var todayYear = new Date().getFullYear();
+		var todayMonth = new Date().getMonth()+1;
+		var todayDay = new Date().getDate();
+		for ( var k = 1; k <= calendarDays.length ; k++)
+		{
+			if (k==1)
+			{
+				_this.html += '<'+_this.lineOpenTag+'>';
+			}
+			var disableClass= '';
+			if ( k <= prevNum || k > (prevNum+days))
+			{
+				var disableClass = ' disable-class';
+				
+			}
+			var currentClass = '';
+			if ( k > prevNum && k <= (prevNum + days))
+			{
+				//把今天的日期加上class
+				if (year==todayYear && month==todayMonth && (k - prevNum)==todayDay)
+				{
+					currentClass = 'is-today';
+				}
+			}
+
+			_this.html += '<'+_this.openTag+" class='"+disableClass+' '+currentClass+"'>"+calendarDays[k-1]+"</"+_this.closeTag+'>';
+			if (k%7==0 && k!=0 && k!=calendarDays.length)
+			{
+				_this.html += '</'+_this.lineCloseTag+'><'+_this.lineOpenTag+'>';
+			}
+		}
+		_this.html += '</'+_this.lineCloseTag+'>';
+		//$result .= "</table>";
+		_this.currentYear = year;
+		_this.currentMonth = month;
+		return _this.html;
+	}
+
+	_this.setDate = function()
+	{
+		var calendar = document.getElementsByClassName('y-calendar-calendar-box');
+		calendarUl = calendar[0].getElementsByTagName('ul');
+		calendarUl[0].innerHTML = datepicker.html;
+	}
+
+	Ydatepicker.prevMonth = function()
+	{
+		var currentYearNode = document.getElementsByClassName('y-calendar-current-year');
+		var currentMonthNode = document.getElementsByClassName('y-calendar-current-month');
+		var currentYear = parseInt(currentYearNode[0].innerHTML);
+		var currentMonth = parseInt(currentMonthNode[0].innerHTML);
+		var month = 0;
+		var year = 0;
+		if (currentMonth==1)
+		{
+			month = 12;
+			year = currentYear-1;
+		}
+		else
+		{
+			month = currentMonth-1;
+			year = currentYear;
+		}
+		currentYearNode[0].innerHTML = year;
+		currentMonthNode[0].innerHTML = month;
+		var calendarHtml = _this.createCalendarHtml(year,month);
+		_this.setDate();
+	}
+
+	Ydatepicker.nextMonth = function()
+	{
+		var currentYearNode = document.getElementsByClassName('y-calendar-current-year');
+		var currentMonthNode = document.getElementsByClassName('y-calendar-current-month');
+		var currentYear = parseInt(currentYearNode[0].innerHTML);
+		var currentMonth = parseInt(currentMonthNode[0].innerHTML);
+		var month = 0;
+		var year = 0;
+		if (currentMonth==12)
+		{
+			month = 1;
+			year = currentYear+1;
+		}
+		else
+		{
+			month = currentMonth+1;
+			year = currentYear;
+		}
+		currentYearNode[0].innerHTML = year;
+		currentMonthNode[0].innerHTML = month;
+		var calendarHtml = _this.createCalendarHtml(year,month);
+		_this.setDate();
+	}
+
+	Ydatepicker.yearSelect = function()
+	{
+		var yearSelecterNode = document.getElementsByClassName('y-calendar-year-selecter-drop');
+		if (yearSelecterNode[0].style.display == 'block')
+		{
+			yearSelecterNode[0].style.display = 'none';
+		}
+		else
+		{
+			yearSelecterNode[0].style.display = 'block';
+		}
+		
+	}
+
+	Ydatepicker.monthSelect = function()
+	{
+		var monthSelecterNode = document.getElementsByClassName('y-calendar-month-selecter-drop');
+		if (monthSelecterNode[0].style.display == 'block')
+		{
+			monthSelecterNode[0].style.display = 'none';
+		}
+		else
+		{
+			monthSelecterNode[0].style.display = 'block';
+		}
+		
+	}
+
+
+
+}
+
+var datepicker = new Ydatepicker();
+datepicker.createCalendarHtml();
+datepicker.setDate();
+
+</script>
+</html>

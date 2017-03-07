@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="gbk" />
+<meta name="robots" content="all" />
+<meta name="author" content="w3school.com.cn" />
+<style>
+#calendar{width: 720px;}
+#calendar .disable{background: #eee;}
+	#calendar li{
+		float: left;width: 100px;height: 100px;border:1px solid #eee;list-style: none;text-align: center;line-height: 100px;
+	}
+</style>
+<title>JavaScript Date 对象</title>
+
+</head>
+
+<body class="browserscripting" id="jsref">
+<ul id="calendar">
+	
+</ul>
+</body>
+<script>
+	function calendar(year,month,shows)
+	{
+
+		var nowDate = new Date();
+		year  = year ? year : nowDate.getFullYear();
+		month = month ? month : nowDate.getMonth();
+
+		var date = new Date(year,month-1,1);//月份需要减1
+
+		//$firstDay = mktime(0, 0, 0, $month, 1, $year);   //当月第一天的时间戳
+		//$firstDayWeek = date('w',$firstDay);		     //当月第一天是星期几
+		var firstDayWeek = date.getDay();		     //当月第一天是星期几
+		//$days = date('t', $firstDay);				     //当月天数是多少天
+		var days = new Date(year,month,0).getDate(); //当月天数是多少天，这里月份又不需要减1，搞不懂。。。
+
+		//$lastDay = mktime(0, 0, 0, $month, $days, $year);//当月最后一天的时间戳
+		//$lastDayWeek = date('w',$lastDay);				 //当月最后一天是星期几
+		var lastDayWeek = new Date(year,month-1,days).getDay(); //当月最后一天是星期几，这里月份还是要减1
+		var calendarDays = [];
+
+		//星期转换
+		if (firstDayWeek===0)
+		{
+			firstDayWeek = 7;
+		}
+
+		if (lastDayWeek===0)
+		{
+			lastDayWeek = 7;
+		}
+
+
+		for(var i=1;i<=days;i++)
+		{
+			calendarDays.push(i);
+		}
+		var prevNum = 0;
+
+		var startWeekDay = 1;//日历视图，起始星期
+		//如果第一天不是设定的起始星期 则需要在日历前加上上一个月的日历
+		
+		if (firstDayWeek!=startWeekDay)
+		{
+			var prevMonth = prevYear = 0;
+			if (month==1)
+			{
+				prevMonth = 12;
+				prevYear = year-1;
+			}
+			else
+			{
+				prevMonth = month-1;
+				prevYear = year;
+			}
+
+			var prevDays = new Date(prevYear,prevMonth,0).getDate();//前一个月天数是多少天
+			var prevCalenderDays = [];
+			for(var i=(prevDays-firstDayWeek)+startWeekDay+1; i<=prevDays ; i++)
+			{
+				prevCalenderDays.push(i);
+			}
+			prevNum = prevDays - (prevDays-firstDayWeek+startWeekDay);
+			calendarDays = prevCalenderDays.concat( calendarDays );
+		}
+
+
+		//如果最后一天不是星期六 则需要在日历后加上下一个月的日历
+		var lastNum = 6+startWeekDay-lastDayWeek;
+		if (lastNum>0)
+		{
+			var nextCalenderDays = [];
+			for(var i=1; i<=lastNum ; i++)
+			{
+				nextCalenderDays.push(i);
+			}
+
+			calendarDays = calendarDays.concat( nextCalenderDays );
+		}
+		
+
+
+		var html = '';
+		var calendarData = [];
+		for (var k = 1;k<=calendarDays.length ;k++)
+		{
+
+			var temp = {'isCurrentDay':'','count':0,'shows':[],'isCurrentMonth':''};
+
+
+			temp.day   = calendarDays[k-1];
+			if (k>prevNum && k<=(prevNum+days))
+			{	
+				//本月中的号数
+				temp['isCurrentMonth'] = 'yes';
+				//当天当前号数
+				var currentClass = '';
+				if (year == nowDate.getFullYear() && month == nowDate.getMonth() && (k-prevNum)==parseInt(nowDate.getDate()))
+				{
+					currentClass = 'on';
+					temp['isCurrentDay'] = 'yes';
+				}
+
+				//当天无演出的样式class
+				html += '<li>'+
+                            '<div class="'+currentClass+'"><span class="date">'+calendarDays[k-1]+'</span>'+
+                        '</li>';
+				
+			}
+			else
+			{
+				//非本月中的号数
+				html += '<li>'+
+                                '<div class="disable"><span class="date">'+calendarDays[k-1]+'</span></div>'+
+                            '</li>';
+			}
+
+			calendarData.push(temp);
+
+		}
+
+		return {'calendar':calendarData,'calendarHtml':html,'sches':shows};
+	}
+	var html = calendar(2017,3);
+	document.getElementById('calendar').innerHTML = html.calendarHtml;
+	console.log(html)
+</script>
+</html>
