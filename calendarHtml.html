@@ -1,32 +1,189 @@
 <!DOCTYPE html>
 <html lang="zh-cn">
 <head>
-<meta charset="gbk" />
+<meta charset="utf-8" />
 <meta name="robots" content="all" />
 <meta name="author" content="w3school.com.cn" />
 <style>
-#calendar{width: 720px;}
-#calendar .disable{background: #eee;}
-	#calendar li{
-		float: left;width: 100px;height: 100px;border:1px solid #eee;list-style: none;text-align: center;line-height: 100px;
-	}
+body{background: #6F7FA0;}
+*{margin: 0;padding: 0;font-family: '微软雅黑'}
+.calendar{width: 700px;margin: 20px auto;}
+.calendar .calendar-toolbar{height: 100px;width: 100%;background-color: #2A364E;border-bottom: 1px solid #6c8dd0;}
+.calendar .calendar-toolbar .calendar-btn{width: 100px;height: 100%;text-align: center;line-height: 100px;cursor: pointer;background-color: #2A364E;font-size: 50px;color: white;}
+.calendar .calendar-toolbar .calendar-btn:hover{background-color: #355086;}
+.calendar .calendar-toolbar .calendar-right-btn{float: right;}
+.calendar .calendar-toolbar .calendar-left-btn{float: left;}
+.calendar .calendar-toolbar .calendar-right-btn{float: right;width: 100px;height: 100%;text-align: center;line-height: 100px;cursor: pointer;}
+.calendar .calendar-toolbar .calendar-date-option-wrap{float: left;height: 100%;}
+.calendar .calendar-toolbar .calendar-date-option-wrap select{height: 30px;margin: 10% 20px 0 20px;}
+.calendar #calendar-header{height: 100px;background: #2A364E;color: white;}
+.calendar #calendar-header .calendar-header-item{width: 100px;height: 100%;float: left;text-align: center;line-height: 100px;}
+
+.calendar #calendar-days{color: white;}
+.calendar #calendar-days .disable{background: #323d52;}
+.calendar #calendar-days li{float: left;width: 100px;height: 100px;list-style: none;text-align: center;line-height: 100px;background-color: #434E65}
+.calendar #calendar-days li:hover{width: 96px;height: 96px;line-height: 96px;border: 2px solid #9BC5E8;}
+
 </style>
-<title>JavaScript Date 对象</title>
+<title>日历</title>
 
 </head>
 
-<body class="browserscripting" id="jsref">
-<ul id="calendar">
-	
-</ul>
+<body>
+<div class="calendar">
+	<div class="calendar-toolbar">
+		<div id="id-calendar-left-btn" class="calendar-left-btn calendar-btn">
+			<
+		</div>
+		<div class="calendar-date-option-wrap">
+			<select id="id-calendar-year-select">
+
+			</select>
+
+			<select id="id-calendar-month-select">
+
+			</select>
+
+			<select id="id-calendar-week-start-select">
+				<option>-起始星期-</option>
+				<option>1</option>
+				<option>2</option>
+				<option>3</option>
+				<option>4</option>
+				<option>5</option>
+				<option>6</option>
+				<option>7</option>
+			</select>
+		</div>
+		<div id="id-calendar-right-btn" class="calendar-right-btn calendar-btn">
+			>
+		</div>
+	</div>
+	<div id="calendar-header"></div>
+	<ul id="calendar-days">
+		
+	</ul>
+</div>
+
 </body>
 <script>
-	function calendar(year,month,shows)
+(function(root){
+	var CreatorCalendar = function(year,month,startWeekDay)
+	{
+		var nowDate = new Date(),
+			_this  = this;
+
+		this.year  		  = year ? year : nowDate.getFullYear();
+		this.month 		  = month ? month : nowDate.getMonth();
+		this.startWeekDay = startWeekDay ? startWeekDay : 1;
+		this.yearSelect   = document.getElementById('id-calendar-year-select');
+		this.monthSelect  = document.getElementById('id-calendar-month-select');
+		this.startWeekDaySelect  = document.getElementById('id-calendar-week-start-select');
+
+		this.refresh = function()
+		{
+			var html = CreatorCalendar.generateHtml(this.year,this.month,this.startWeekDay);
+			document.getElementById('calendar-days').innerHTML = html.daysHtml;
+			document.getElementById('calendar-header').innerHTML = html.headHtml;
+			this.yearSelect.value = this.year;
+			this.monthSelect.value = this.month;
+			this.startWeekDaySelect.value = this.startWeekDay;
+		}
+
+		this.init = function()
+		{
+			//初始化年份select
+			var html = '<option>-年份-</option>';
+			for(var k = 1970;k<=2046;k++)
+			{
+				html+='<option>'+k+'</option>';
+			}
+			this.yearSelect.innerHTML = html;
+
+			//初始化月份select
+			html = '<option>-月份-</option>';
+			for(var k = 1;k<=12;k++)
+			{
+				html+='<option>'+k+'</option>';
+			}
+
+			this.monthSelect.innerHTML = html;
+
+			this.refresh();
+
+			//年份切换
+			this.yearSelect.addEventListener("change", function(){
+				
+				if (parseInt(this.value)>0)
+				{
+					_this.year = parseInt(this.value);
+					_this.refresh();
+				}
+			});
+
+			//月份切换
+			this.monthSelect.addEventListener("change", function(){
+				
+				if (parseInt(this.value)>0)
+				{
+					_this.month = parseInt(this.value);
+					_this.refresh();
+				}
+			});
+
+			//起始星期切换
+			this.startWeekDaySelect.addEventListener("change", function(){
+				
+				if (parseInt(this.value)>0)
+				{
+					_this.startWeekDay = parseInt(this.value);
+					_this.refresh();
+				}
+			});
+
+			//上月按钮
+			document.getElementById('id-calendar-left-btn').addEventListener("click", function(){
+				
+				if (_this.month==1)
+				{
+					_this.month = 12;
+					_this.year = _this.year-1;
+				}
+				else
+				{
+					_this.month = _this.month-1;
+				}
+
+				_this.refresh();
+			});
+
+			//下月按钮
+			document.getElementById('id-calendar-right-btn').addEventListener("click", function(){
+				
+				if (_this.month==12)
+				{
+					_this.month = 1;
+					_this.year = _this.year+1;
+				}
+				else
+				{
+					_this.month = _this.month+1;
+				}
+				
+				_this.refresh();
+			});
+		}
+
+		this.init();
+	}
+
+	CreatorCalendar.generateHtml = function (year,month,startWeekDay)
 	{
 
 		var nowDate = new Date();
 		year  = year ? year : nowDate.getFullYear();
 		month = month ? month : nowDate.getMonth();
+		startWeekDay = parseInt(startWeekDay) ? parseInt(startWeekDay) : 1;//日历视图，起始星期
 
 		var date = new Date(year,month-1,1);//月份需要减1
 
@@ -59,7 +216,7 @@
 		}
 		var prevNum = 0;
 
-		var startWeekDay = 1;//日历视图，起始星期
+
 		//如果第一天不是设定的起始星期 则需要在日历前加上上一个月的日历
 		
 		if (firstDayWeek!=startWeekDay)
@@ -78,17 +235,37 @@
 
 			var prevDays = new Date(prevYear,prevMonth,0).getDate();//前一个月天数是多少天
 			var prevCalenderDays = [];
-			for(var i=(prevDays-firstDayWeek)+startWeekDay+1; i<=prevDays ; i++)
+			var diff = null;
+			if (firstDayWeek > startWeekDay)
+			{
+				diff = firstDayWeek-startWeekDay;
+			}
+			else
+			{
+				diff = 7-startWeekDay+firstDayWeek;
+			}
+			//for(var i=(prevDays-firstDayWeek)+startWeekDay+1; i<=prevDays ; i++)
+			for(var i = prevDays-diff+1; i<=prevDays ; i++)
 			{
 				prevCalenderDays.push(i);
 			}
-			prevNum = prevDays - (prevDays-firstDayWeek+startWeekDay);
+			//prevNum = prevDays - (prevDays-firstDayWeek+startWeekDay);
+			prevNum = diff;
 			calendarDays = prevCalenderDays.concat( calendarDays );
 		}
 
 
-		//如果最后一天不是星期六 则需要在日历后加上下一个月的日历
-		var lastNum = 6+startWeekDay-lastDayWeek;
+		//如果最后一天不是星期末尾 则需要在日历后加上下一个月的日历
+		var lastNum = null;
+		if (lastDayWeek >= startWeekDay)
+		{
+			lastNum = 7-lastDayWeek+startWeekDay-1;
+		}
+		else
+		{
+			lastNum = startWeekDay-lastDayWeek-1;
+		}
+		
 		if (lastNum>0)
 		{
 			var nextCalenderDays = [];
@@ -102,7 +279,7 @@
 		
 
 
-		var html = '';
+		var daysHtml = headHtml = '';
 		var calendarData = [];
 		for (var k = 1;k<=calendarDays.length ;k++)
 		{
@@ -124,27 +301,55 @@
 				}
 
 				//当天无演出的样式class
-				html += '<li>'+
-                            '<div class="'+currentClass+'"><span class="date">'+calendarDays[k-1]+'</span>'+
-                        '</li>';
+				daysHtml += '<li>'+
+	                        '<div class="'+currentClass+'"><span class="date">'+calendarDays[k-1]+'</span>'+
+	                    '</li>';
 				
 			}
 			else
 			{
 				//非本月中的号数
-				html += '<li>'+
-                                '<div class="disable"><span class="date">'+calendarDays[k-1]+'</span></div>'+
-                            '</li>';
+				daysHtml += '<li>'+
+	                            '<div class="disable"><span class="date">'+calendarDays[k-1]+'</span></div>'+
+	                        '</li>';
 			}
 
 			calendarData.push(temp);
 
 		}
 
-		return {'calendar':calendarData,'calendarHtml':html,'sches':shows};
+		var weekTitle = ['周一','周二','周三','周四','周五','周六','周日'];
+		var headHtml = '<div class="calendar-header-item">'+weekTitle[startWeekDay-1]+'</div>';
+		var itemIndex = startWeekDay+1;
+		if (itemIndex>=7)
+		{
+			itemIndex = 1;
+		}
+		
+		for(var i=0;i<6;i++)
+		{
+			
+			headHtml+='<div class="calendar-header-item">'+weekTitle[itemIndex-1]+'</div>';
+			if (itemIndex>=7)
+			{
+				itemIndex = 1;
+			}
+			else
+			{
+				itemIndex++;
+			}
+		}
+
+		return {'calendar':calendarData,'daysHtml':daysHtml,'headHtml':headHtml};
 	}
-	var html = calendar(2017,3);
-	document.getElementById('calendar').innerHTML = html.calendarHtml;
-	console.log(html)
+
+	root.CreatorCalendar = CreatorCalendar;
+
+})(window)
+
+
+var myCalendar = new CreatorCalendar(2017,3);
+	
+
 </script>
 </html>
